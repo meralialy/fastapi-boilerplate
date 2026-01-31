@@ -1,0 +1,135 @@
+[project]
+name = "fastapi-boilerplate"
+version = "0.0.0"
+description = "Modern FastAPI boilerplate with strict linting"
+requires-python = ">=3.14"
+dependencies = [ # Use compatible release specifiers for safer upgrades
+    "fastapi~=0.128.0",
+    "jinja2>=3.1.6",
+    "pydantic-settings~=2.12.0",
+    "pydantic~=2.12.5",
+    "uvicorn~=0.40.0",
+]
+
+[dependency-groups]
+dev = [ # Use compatible release specifiers for safer upgrades
+    "dotenv-linter~=0.7.0",
+    "httpx~=0.28.1",
+    "mypy~=1.14.0",
+    "pre-commit~=4.5.1",
+    "pytest~=9.0.2",
+    "pytest-asyncio~=1.3.0",
+    "pytest-cov~=7.0.0",
+    "ruff~=0.14.11",
+]
+
+[tool.ruff]
+# target-version is inferred from project.requires-python
+line-length = 120
+# Respect .gitignore
+src = ["app"]
+
+[tool.ruff.lint]
+select = [
+    "ANN", # flake8-annotations
+    "B",   # flake8-bugbear
+    "C90", # mccabe
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "S",   # flake8-bandit
+    "G",   # flake8-logging-format
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "PT",  # flake8-pytest-style
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+    "ISC", # flake8-implicit-str-concat
+    "RET", # flake8-return
+    "SLOT",# flake8-slots (memory optimization)
+    "FURB",# refurb (modernizing python)
+    "TRY", # tryceratops (exception handling anti-patterns)
+    "ERA", # eradicate (commented-out code)
+    "PERF",# Perflint
+    "T20", # flake8-print (no print statements)
+    "PL",  # Pylint
+    "PIE", # flake8-pie (misc lints)
+    "UP",  # pyupgrade
+    "W",   # pycodestyle warnings
+    "RUF", # Ruff-specific rules
+]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",    #allow asserts in tests
+    "ANN",     # relax type hints for test functions to avoid boilerplate
+    "ARG001",  # Allow unused function arguments (common with pytest fixtures)
+    "PLR2004"  # Allow "magic values" (like checking for status_code == 200)
+]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+python_version = "3.14"
+strict = true
+mypy_path = "."
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+explicit_package_bases = true
+follow_imports = "silent"
+ignore_missing_imports = false  # Set to false for stricter type checking in production.
+incremental = true
+no_implicit_reexport = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unused_ignores = true
+exclude = [
+    ".venv",
+    "node_modules",
+    "build/",
+    "dist"
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+[tool.pydantic-mypy]
+# These settings ensure Pydantic models behave during type checks
+init_forbid_extra = true
+init_typed = true
+warn_untyped_fields = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=app --cov-report=term-missing -v --strict-markers"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["app"]
+branch = true  # Check partial execution of branches (if/else)
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

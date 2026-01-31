@@ -1,0 +1,40 @@
+# --- Default Handling ---
+# Auto-detect text files and enforce LF (Unix-style) line endings for consistency.
+# This is critical for preventing issues when files are edited on Windows (CRLF)
+# but used in Linux-based environments like Docker containers (which expect LF).
+* text=auto eol=lf
+
+# --- Source Code ---
+# Explicitly define Python files as text with LF line endings.
+*.py text eol=lf
+
+# --- Configuration Files ---
+# Ensure consistent line endings for all configuration files.
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+.editorconfig text eol=lf
+.env.example text eol=lf
+
+# --- Documentation ---
+# Enforce LF for Markdown files to ensure consistent rendering.
+*.md text eol=lf
+
+# --- Build, CI/CD & Git ---
+# Ensure build scripts and ignore files have consistent LF endings.
+Makefile text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# --- Binary Files ---
+# Mark common binary file types to prevent Git from attempting to normalize
+# their line endings, which could corrupt the files.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

@@ -1,0 +1,48 @@
+# Version Control
+.git
+.gitignore
+.gitattributes
+
+# Python & Dependencies
+__pycache__
+*.py[cod]
+*$py.class
+.venv
+venv
+env
+
+# Testing & Linting
+.mypy_cache
+.pytest_cache
+.ruff_cache
+coverage.xml
+htmlcov
+tests
+
+# Configuration & Secrets
+.env
+.env.*
+
+# Build Artifacts
+dist
+build
+*.egg-info
+
+# IDE & Editor Configuration
+.vscode
+.idea
+.editorconfig
+*.swp
+.DS_Store
+
+# Docker & Infrastructure
+.dockerignore
+docker-compose.yaml
+Dockerfile
+Makefile
+
+# Documentation & CI
+.github
+.pre-commit-config.yaml
+*.md # Ignore markdown files
+!README.md # but keep the README

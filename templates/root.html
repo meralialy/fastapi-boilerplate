@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project_name }}</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; }
+        h1 { color: #333; }
+        .code { background: #f4f4f4; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
+        .btn { display: inline-block; background: #009688; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .btn:hover { background: #00796b; }
+    </style>
+</head>
+<body>
+    <h1>🚀 {{ project_name }} is running!</h1>
+    <p>Version: <span class="code">{{ project_version }}</span></p>
+    <p>Environment: <span class="code">{{ environment }}</span></p>
+    <p>The application has started successfully. You can access the API documentation below.</p>
+    {% if environment.lower() == "production" %}
+        <a href="/redoc" class="btn">API Docs</a>
+    {% else %}
+        <a href="/docs" class="btn">Interactive API Docs</a>
+    {% endif %}
+</body>
+</html>
