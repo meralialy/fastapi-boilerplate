@@ -1,0 +1,39 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-json
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format --force-exclude
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --force-exclude
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: dotenv-linter
+        name: dotenv-linter
+        entry: uv run dotenv-linter
+        language: system
+        files: \.env.*$
+      - id: mypy
+        name: mypy
+        entry: uv run mypy .
+        language: system
+        pass_filenames: false
+        types: [python]

@@ -1,0 +1,7 @@
+services:
+  api:
+    build:
+      target: staging
+    environment:
+      - APP_ENV=staging
+      - DEBUG=False

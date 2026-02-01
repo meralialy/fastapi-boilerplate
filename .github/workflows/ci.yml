@@ -1,0 +1,129 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    # Trigger on any push branch
+    branches: ["**"]
+  pull_request:
+    # Trigger for main and develop when requesting a pull request
+    branches: ["main", "develop"]
+  workflow_dispatch:
+
+jobs:
+  # JOB 1: Lint and Format
+  lint-and-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    container: python:3.14-slim
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          apt-get update && apt-get install -y git curl
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Dependencies
+        run: |
+          uv sync --frozen --all-groups
+
+      - name: Check Formatting (Ruff)
+        run: uv run ruff format . --check
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-reset-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run Lint (Ruff)
+        run: uv run ruff check .
+
+      - name: Lint .env files
+        run: uv run dotenv-linter .env*
+
+      - name: Type Check (MyPy)
+        run: uv run mypy .
+
+  # JOB 2: Test and Code Coverage
+  test-and-coverage:
+    name: Test and Coverage
+    runs-on: ubuntu-latest
+    container: python:3.14-slim
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Dependencies
+        run: |
+          uv sync --frozen --all-groups
+
+      - name: Run Tests
+        # Runs tests and generates coverage report
+        run: uv run pytest --cov=./ --cov-report=xml
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 5
+
+  # JOB 3: Build Docker Image
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, test-and-coverage]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Determine Build Target
+        id: target
+        run: |
+          TARGET=""
+          if [[ "${{ github.base_ref }}" == "develop" ]] || [[ "${{ github.ref_name }}" == "develop" ]]; then
+            TARGET="staging"
+          elif [[ "${{ github.base_ref }}" == "main" ]] || [[ "${{ github.ref_name }}" == "main" ]]; then
+            TARGET="production"
+          fi
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: fastapi-boilerplate:latest
+          target: ${{ steps.target.outputs.target }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: "fastapi-boilerplate:latest"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+        env:
+          TRIVY_OFFLINE_SCAN: true
